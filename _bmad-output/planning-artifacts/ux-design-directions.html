@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Awesome Todo — Design Directions</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f3f4f6; color: #111827; }
+
+  .nav { position: sticky; top: 0; z-index: 10; background: #1f2937; color: #fff; padding: 16px 32px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .nav h1 { font-size: 1rem; font-weight: 700; margin-right: auto; }
+  .nav button { background: transparent; color: #d1d5db; border: 1px solid #4b5563; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.875rem; font-family: inherit; transition: all 0.15s; }
+  .nav button:hover, .nav button.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+
+  .directions { display: none; }
+  .directions.active { display: block; }
+
+  .mockup-container { max-width: 720px; margin: 48px auto; padding: 0 24px; }
+  .mockup-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7280; margin-bottom: 8px; font-weight: 500; }
+  .mockup-title { font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 4px; }
+  .mockup-desc { font-size: 0.875rem; color: #6b7280; margin-bottom: 32px; line-height: 1.6; }
+
+  /* === Direction 1: Clean Minimal === */
+  .d1-app { background: #ffffff; min-height: 500px; padding: 48px 32px; max-width: 640px; margin: 0 auto; }
+  .d1-header { font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 32px; }
+  .d1-form { display: flex; gap: 8px; margin-bottom: 24px; }
+  .d1-input { flex: 1; padding: 12px 16px; font-size: 1rem; border: none; border-bottom: 2px solid #e5e7eb; background: transparent; outline: none; font-family: inherit; color: #111827; transition: border-color 0.15s; }
+  .d1-input:focus { border-bottom-color: #2563eb; }
+  .d1-input::placeholder { color: #9ca3af; }
+  .d1-btn-add { padding: 12px 24px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .d1-btn-add:hover { background: #1d4ed8; }
+  .d1-list { list-style: none; }
+  .d1-item { display: flex; align-items: center; padding: 16px 0; gap: 12px; }
+  .d1-item:not(:last-child) { border-bottom: 1px solid #f3f4f6; }
+  .d1-checkbox { width: 20px; height: 20px; border-radius: 4px; border: 2px solid #d1d5db; cursor: pointer; flex-shrink: 0; appearance: none; -webkit-appearance: none; transition: all 0.15s; }
+  .d1-checkbox:checked { background: #2563eb; border-color: #2563eb; }
+  .d1-text { flex: 1; font-size: 1rem; color: #111827; line-height: 1.5; }
+  .d1-text.completed { text-decoration: line-through; color: #9ca3af; }
+  .d1-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  .d1-item:hover .d1-actions { opacity: 1; }
+  .d1-btn-sm { padding: 6px 12px; font-size: 0.75rem; border: 1px solid #e5e7eb; background: #fff; border-radius: 4px; cursor: pointer; font-family: inherit; color: #6b7280; transition: all 0.15s; }
+  .d1-btn-sm:hover { border-color: #d1d5db; color: #111827; }
+  .d1-btn-sm.delete:hover { border-color: #dc2626; color: #dc2626; }
+  .d1-empty { text-align: center; padding: 64px 0; color: #9ca3af; font-size: 1rem; }
+
+  /* === Direction 2: Structured Card === */
+  .d2-app { background: #f9fafb; min-height: 500px; padding: 48px 32px; }
+  .d2-card { background: #fff; max-width: 640px; margin: 0 auto; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 32px; }
+  .d2-header { font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 24px; }
+  .d2-form { display: flex; gap: 8px; margin-bottom: 24px; }
+  .d2-input { flex: 1; padding: 12px 16px; font-size: 1rem; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb; outline: none; font-family: inherit; color: #111827; transition: all 0.15s; }
+  .d2-input:focus { border-color: #2563eb; background: #fff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+  .d2-input::placeholder { color: #9ca3af; }
+  .d2-btn-add { padding: 12px 24px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-size: 0.875rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .d2-btn-add:hover { background: #1d4ed8; }
+  .d2-list { list-style: none; }
+  .d2-item { display: flex; align-items: center; padding: 14px 16px; gap: 12px; border-radius: 8px; margin-bottom: 4px; transition: background 0.1s; }
+  .d2-item:hover { background: #f9fafb; }
+  .d2-checkbox { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #d1d5db; cursor: pointer; flex-shrink: 0; appearance: none; -webkit-appearance: none; transition: all 0.15s; }
+  .d2-checkbox:checked { background: #2563eb; border-color: #2563eb; }
+  .d2-text { flex: 1; font-size: 1rem; color: #111827; line-height: 1.5; }
+  .d2-text.completed { text-decoration: line-through; color: #9ca3af; }
+  .d2-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  .d2-item:hover .d2-actions { opacity: 1; }
+  .d2-btn-sm { padding: 6px 12px; font-size: 0.75rem; border: none; background: #f3f4f6; border-radius: 6px; cursor: pointer; font-family: inherit; color: #6b7280; transition: all 0.15s; }
+  .d2-btn-sm:hover { background: #e5e7eb; color: #111827; }
+  .d2-btn-sm.delete:hover { background: #fef2f2; color: #dc2626; }
+
+  /* === Direction 3: Warm Neutral === */
+  .d3-app { background: #faf9f7; min-height: 500px; padding: 48px 32px; max-width: 640px; margin: 0 auto; }
+  .d3-header { font-size: 1.5rem; font-weight: 700; color: #292524; margin-bottom: 32px; }
+  .d3-form { display: flex; gap: 8px; margin-bottom: 24px; }
+  .d3-input { flex: 1; padding: 12px 16px; font-size: 1rem; border: 1px solid #e7e5e4; border-radius: 6px; background: #fff; outline: none; font-family: inherit; color: #292524; transition: all 0.15s; }
+  .d3-input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.08); }
+  .d3-input::placeholder { color: #a8a29e; }
+  .d3-btn-add { padding: 12px 24px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-size: 0.875rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .d3-btn-add:hover { background: #1d4ed8; }
+  .d3-list { list-style: none; }
+  .d3-item { display: flex; align-items: center; padding: 16px 0; gap: 12px; }
+  .d3-item:not(:last-child) { border-bottom: 1px solid #e7e5e4; }
+  .d3-checkbox { width: 20px; height: 20px; border-radius: 4px; border: 2px solid #d6d3d1; cursor: pointer; flex-shrink: 0; appearance: none; -webkit-appearance: none; transition: all 0.15s; }
+  .d3-checkbox:checked { background: #2563eb; border-color: #2563eb; }
+  .d3-text { flex: 1; font-size: 1rem; color: #292524; line-height: 1.5; }
+  .d3-text.completed { text-decoration: line-through; color: #a8a29e; }
+  .d3-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+  .d3-item:hover .d3-actions { opacity: 1; }
+  .d3-btn-sm { padding: 6px 12px; font-size: 0.75rem; border: 1px solid #e7e5e4; background: transparent; border-radius: 4px; cursor: pointer; font-family: inherit; color: #78716c; transition: all 0.15s; }
+  .d3-btn-sm:hover { border-color: #d6d3d1; color: #292524; }
+  .d3-btn-sm.delete:hover { border-color: #dc2626; color: #dc2626; }
+
+  /* === Comparison === */
+  .compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1200px; margin: 48px auto; padding: 0 24px; }
+  .compare-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+  .compare-card h3 { padding: 12px 16px; font-size: 0.875rem; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+  .compare-mini { transform: scale(0.6); transform-origin: top left; width: 166.67%; height: 300px; pointer-events: none; }
+
+  /* === Toast demo === */
+  .toast-demo { position: fixed; bottom: 24px; right: 24px; background: #1f2937; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 0.875rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: none; animation: slideIn 0.3s ease; }
+  @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  @media (max-width: 768px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .d1-actions, .d2-actions, .d3-actions { opacity: 1; }
+    .nav { gap: 8px; padding: 12px 16px; }
+    .nav button { padding: 6px 12px; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <h1>Awesome Todo — Design Directions</h1>
+  <button class="active" onclick="show('d1')">1. Clean Minimal</button>
+  <button onclick="show('d2')">2. Structured Card</button>
+  <button onclick="show('d3')">3. Warm Neutral</button>
+  <button onclick="show('compare')">Compare All</button>
+</div>
+
+<!-- Direction 1: Clean Minimal -->
+<div id="d1" class="directions active">
+  <div class="mockup-container">
+    <div class="mockup-label">Direction 1</div>
+    <div class="mockup-title">Clean Minimal</div>
+    <div class="mockup-desc">Maximum whitespace, borderless input, invisible UI chrome. Tasks separated by hair-thin lines. Action buttons appear only on hover. The most stripped-back version — the interface almost isn't there.</div>
+  </div>
+  <div class="d1-app">
+    <div class="d1-header">Awesome Todo</div>
+    <form class="d1-form" onsubmit="return false;">
+      <input class="d1-input" type="text" placeholder="Add a new task...">
+      <button class="d1-btn-add" onclick="showToast('Task added!')">Add</button>
+    </form>
+    <ul class="d1-list">
+      <li class="d1-item">
+        <input type="checkbox" class="d1-checkbox">
+        <span class="d1-text">Send invoice to Laura</span>
+        <div class="d1-actions"><button class="d1-btn-sm">Edit</button><button class="d1-btn-sm delete">Delete</button></div>
+      </li>
+      <li class="d1-item">
+        <input type="checkbox" class="d1-checkbox">
+        <span class="d1-text">Buy printer ink</span>
+        <div class="d1-actions"><button class="d1-btn-sm">Edit</button><button class="d1-btn-sm delete">Delete</button></div>
+      </li>
+      <li class="d1-item">
+        <input type="checkbox" class="d1-checkbox">
+        <span class="d1-text">Reply to Alex's email</span>
+        <div class="d1-actions"><button class="d1-btn-sm">Edit</button><button class="d1-btn-sm delete">Delete</button></div>
+      </li>
+      <li class="d1-item">
+        <input type="checkbox" class="d1-checkbox" checked>
+        <span class="d1-text completed">Prepare presentation for Friday</span>
+        <div class="d1-actions"><button class="d1-btn-sm">Edit</button><button class="d1-btn-sm delete">Delete</button></div>
+      </li>
+      <li class="d1-item">
+        <input type="checkbox" class="d1-checkbox" checked>
+        <span class="d1-text completed">Email professor about extension</span>
+        <div class="d1-actions"><button class="d1-btn-sm">Edit</button><button class="d1-btn-sm delete">Delete</button></div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Direction 2: Structured Card -->
+<div id="d2" class="directions">
+  <div class="mockup-container">
+    <div class="mockup-label">Direction 2</div>
+    <div class="mockup-title">Structured Card</div>
+    <div class="mockup-desc">A subtle card container provides visual grounding. Rounded input with focus ring. Items have hover backgrounds and circular checkboxes. Slightly more defined boundaries while maintaining simplicity.</div>
+  </div>
+  <div class="d2-app">
+    <div class="d2-card">
+      <div class="d2-header">Awesome Todo</div>
+      <form class="d2-form" onsubmit="return false;">
+        <input class="d2-input" type="text" placeholder="Add a new task...">
+        <button class="d2-btn-add" onclick="showToast('Task added!')">Add</button>
+      </form>
+      <ul class="d2-list">
+        <li class="d2-item">
+          <input type="checkbox" class="d2-checkbox">
+          <span class="d2-text">Send invoice to Laura</span>
+          <div class="d2-actions"><button class="d2-btn-sm">Edit</button><button class="d2-btn-sm delete">Delete</button></div>
+        </li>
+        <li class="d2-item">
+          <input type="checkbox" class="d2-checkbox">
+          <span class="d2-text">Buy printer ink</span>
+          <div class="d2-actions"><button class="d2-btn-sm">Edit</button><button class="d2-btn-sm delete">Delete</button></div>
+        </li>
+        <li class="d2-item">
+          <input type="checkbox" class="d2-checkbox">
+          <span class="d2-text">Reply to Alex's email</span>
+          <div class="d2-actions"><button class="d2-btn-sm">Edit</button><button class="d2-btn-sm delete">Delete</button></div>
+        </li>
+        <li class="d2-item">
+          <input type="checkbox" class="d2-checkbox" checked>
+          <span class="d2-text completed">Prepare presentation for Friday</span>
+          <div class="d2-actions"><button class="d2-btn-sm">Edit</button><button class="d2-btn-sm delete">Delete</button></div>
+        </li>
+        <li class="d2-item">
+          <input type="checkbox" class="d2-checkbox" checked>
+          <span class="d2-text completed">Email professor about extension</span>
+          <div class="d2-actions"><button class="d2-btn-sm">Edit</button><button class="d2-btn-sm delete">Delete</button></div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Direction 3: Warm Neutral -->
+<div id="d3" class="directions">
+  <div class="mockup-container">
+    <div class="mockup-label">Direction 3</div>
+    <div class="mockup-title">Warm Neutral</div>
+    <div class="mockup-desc">Same clean layout as Direction 1 but with warmer stone/beige tones instead of cool grays. Feels softer and more personal — like a quality notebook rather than a digital tool.</div>
+  </div>
+  <div class="d3-app">
+    <div class="d3-header">Awesome Todo</div>
+    <form class="d3-form" onsubmit="return false;">
+      <input class="d3-input" type="text" placeholder="Add a new task...">
+      <button class="d3-btn-add" onclick="showToast('Task added!')">Add</button>
+    </form>
+    <ul class="d3-list">
+      <li class="d3-item">
+        <input type="checkbox" class="d3-checkbox">
+        <span class="d3-text">Send invoice to Laura</span>
+        <div class="d3-actions"><button class="d3-btn-sm">Edit</button><button class="d3-btn-sm delete">Delete</button></div>
+      </li>
+      <li class="d3-item">
+        <input type="checkbox" class="d3-checkbox">
+        <span class="d3-text">Buy printer ink</span>
+        <div class="d3-actions"><button class="d3-btn-sm">Edit</button><button class="d3-btn-sm delete">Delete</button></div>
+      </li>
+      <li class="d3-item">
+        <input type="checkbox" class="d3-checkbox">
+        <span class="d3-text">Reply to Alex's email</span>
+        <div class="d3-actions"><button class="d3-btn-sm">Edit</button><button class="d3-btn-sm delete">Delete</button></div>
+      </li>
+      <li class="d3-item">
+        <input type="checkbox" class="d3-checkbox" checked>
+        <span class="d3-text completed">Prepare presentation for Friday</span>
+        <div class="d3-actions"><button class="d3-btn-sm">Edit</button><button class="d3-btn-sm delete">Delete</button></div>
+      </li>
+      <li class="d3-item">
+        <input type="checkbox" class="d3-checkbox" checked>
+        <span class="d3-text completed">Email professor about extension</span>
+        <div class="d3-actions"><button class="d3-btn-sm">Edit</button><button class="d3-btn-sm delete">Delete</button></div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Compare All -->
+<div id="compare" class="directions">
+  <div class="mockup-container">
+    <div class="mockup-label">Comparison</div>
+    <div class="mockup-title">Side by Side</div>
+    <div class="mockup-desc">Compare all three directions. Each uses the same content and layout structure — the differences are in visual weight, warmth, and chrome.</div>
+  </div>
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h3>1. Clean Minimal</h3>
+      <div style="overflow:hidden; height:300px;">
+        <div class="compare-mini">
+          <div class="d1-app" style="min-height:auto; padding:32px 24px;">
+            <div class="d1-header" style="font-size:1.25rem; margin-bottom:20px;">Awesome Todo</div>
+            <div class="d1-form" style="margin-bottom:16px;"><input class="d1-input" placeholder="Add a new task..." disabled><button class="d1-btn-add" style="padding:10px 16px;">Add</button></div>
+            <ul class="d1-list">
+              <li class="d1-item" style="padding:10px 0;"><input type="checkbox" class="d1-checkbox" disabled><span class="d1-text">Send invoice to Laura</span></li>
+              <li class="d1-item" style="padding:10px 0;"><input type="checkbox" class="d1-checkbox" disabled><span class="d1-text">Buy printer ink</span></li>
+              <li class="d1-item" style="padding:10px 0;"><input type="checkbox" class="d1-checkbox" checked disabled><span class="d1-text completed">Prepare presentation</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="compare-card">
+      <h3>2. Structured Card</h3>
+      <div style="overflow:hidden; height:300px;">
+        <div class="compare-mini">
+          <div class="d2-app" style="min-height:auto; padding:24px;">
+            <div class="d2-card" style="padding:24px;">
+              <div class="d2-header" style="font-size:1.25rem; margin-bottom:16px;">Awesome Todo</div>
+              <div class="d2-form" style="margin-bottom:16px;"><input class="d2-input" placeholder="Add a new task..." disabled><button class="d2-btn-add" style="padding:10px 16px;">Add</button></div>
+              <ul class="d2-list">
+                <li class="d2-item" style="padding:10px 12px;"><input type="checkbox" class="d2-checkbox" disabled><span class="d2-text">Send invoice to Laura</span></li>
+                <li class="d2-item" style="padding:10px 12px;"><input type="checkbox" class="d2-checkbox" disabled><span class="d2-text">Buy printer ink</span></li>
+                <li class="d2-item" style="padding:10px 12px;"><input type="checkbox" class="d2-checkbox" checked disabled><span class="d2-text completed">Prepare presentation</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="compare-card">
+      <h3>3. Warm Neutral</h3>
+      <div style="overflow:hidden; height:300px;">
+        <div class="compare-mini">
+          <div class="d3-app" style="min-height:auto; padding:32px 24px;">
+            <div class="d3-header" style="font-size:1.25rem; margin-bottom:20px;">Awesome Todo</div>
+            <div class="d3-form" style="margin-bottom:16px;"><input class="d3-input" placeholder="Add a new task..." disabled><button class="d3-btn-add" style="padding:10px 16px;">Add</button></div>
+            <ul class="d3-list">
+              <li class="d3-item" style="padding:10px 0;"><input type="checkbox" class="d3-checkbox" disabled><span class="d3-text">Send invoice to Laura</span></li>
+              <li class="d3-item" style="padding:10px 0;"><input type="checkbox" class="d3-checkbox" disabled><span class="d3-text">Buy printer ink</span></li>
+              <li class="d3-item" style="padding:10px 0;"><input type="checkbox" class="d3-checkbox" checked disabled><span class="d3-text completed">Prepare presentation</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-demo" id="toast">Task added!</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.directions').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2000);
+}
+</script>
+</body>
+</html>

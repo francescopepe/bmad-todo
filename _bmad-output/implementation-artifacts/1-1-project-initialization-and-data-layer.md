@@ -1,6 +1,6 @@
 # Story 1.1: Project Initialization & Data Layer
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -28,44 +28,44 @@ So that all subsequent stories have a solid foundation to build on.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Initialize Next.js project (AC: #1)
-  - [ ] Run `npx create-next-app@latest awesome-todo --typescript --tailwind --eslint --app --src-dir --use-npm`
-  - [ ] Verify project structure matches expected layout
-  - [ ] Verify `npm run dev` works
+- [x] Task 1: Initialize Next.js project (AC: #1)
+  - [x] Run `npx create-next-app@latest awesome-todo --typescript --tailwind --eslint --app --src-dir --use-npm`
+  - [x] Verify project structure matches expected layout
+  - [x] Verify `npm run dev` works
 
-- [ ] Task 2: Install and configure Prisma (AC: #2, #3, #4)
-  - [ ] `npm install prisma @prisma/client`
-  - [ ] `npx prisma init --datasource-provider sqlite`
-  - [ ] Define Todo model in `prisma/schema.prisma`
-  - [ ] Create `.env` with `DATABASE_URL=file:./dev.db`
-  - [ ] Create `.env.example` documenting required vars
-  - [ ] Create `.env.test` with `DATABASE_URL=file:./test.db`
-  - [ ] Run `npx prisma db push` to create database
-  - [ ] Run `npx prisma generate` to generate client
+- [x] Task 2: Install and configure Prisma (AC: #2, #3, #4)
+  - [x] `npm install prisma @prisma/client`
+  - [x] `npx prisma init --datasource-provider sqlite`
+  - [x] Define Todo model in `prisma/schema.prisma`
+  - [x] Create `.env` with `DATABASE_URL=file:./dev.db`
+  - [x] Create `.env.example` documenting required vars
+  - [x] Create `.env.test` with `DATABASE_URL=file:./test.db`
+  - [x] Run `npx prisma db push` to create database
+  - [x] Run `npx prisma generate` to generate client
 
-- [ ] Task 3: Create shared library files (AC: #5)
-  - [ ] Create `src/lib/prisma.ts` — Prisma client singleton
-  - [ ] Create `src/lib/types.ts` — Todo, ApiResponse<T>, ApiError types
-  - [ ] Create `src/lib/schemas.ts` — CreateTodoSchema, UpdateTodoSchema
-  - [ ] Create `src/lib/apiHelpers.ts` — successResponse(), errorResponse()
+- [x] Task 3: Create shared library files (AC: #5)
+  - [x] Create `src/lib/prisma.ts` — Prisma client singleton
+  - [x] Create `src/lib/types.ts` — Todo, ApiResponse<T>, ApiError types
+  - [x] Create `src/lib/schemas.ts` — CreateTodoSchema, UpdateTodoSchema
+  - [x] Create `src/lib/apiHelpers.ts` — successResponse(), errorResponse()
 
-- [ ] Task 4: Install and configure Vitest (AC: #6)
-  - [ ] `npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom`
-  - [ ] Create `vitest.config.ts`
-  - [ ] Add `"test"` and `"test:coverage"` scripts to package.json
-  - [ ] Verify `npm test` runs
+- [x] Task 4: Install and configure Vitest (AC: #6)
+  - [x] `npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom`
+  - [x] Create `vitest.config.ts`
+  - [x] Add `"test"` and `"test:coverage"` scripts to package.json
+  - [x] Verify `npm test` runs
 
-- [ ] Task 5: Install and configure Playwright (AC: #7)
-  - [ ] `npm install -D @playwright/test @axe-core/playwright`
-  - [ ] `npx playwright install`
-  - [ ] Create `playwright.config.ts`
-  - [ ] Add `"test:e2e"` script to package.json
-  - [ ] Create `e2e/` directory
+- [x] Task 5: Install and configure Playwright (AC: #7)
+  - [x] `npm install -D @playwright/test @axe-core/playwright`
+  - [x] `npx playwright install`
+  - [x] Create `playwright.config.ts`
+  - [x] Add `"test:e2e"` script to package.json
+  - [x] Create `e2e/` directory
 
-- [ ] Task 6: Update .gitignore and clean up (AC: #8)
-  - [ ] Add to .gitignore: `*.db`, `*.db-journal`, `.env`, `.env.test`, `test-results/`, `playwright-report/`
-  - [ ] Remove default Next.js boilerplate from `src/app/page.tsx` (replace with minimal placeholder)
-  - [ ] Verify `npm run dev` starts cleanly
+- [x] Task 6: Update .gitignore and clean up (AC: #8)
+  - [x] Add to .gitignore: `*.db`, `*.db-journal`, `.env`, `.env.test`, `test-results/`, `playwright-report/`
+  - [x] Remove default Next.js boilerplate from `src/app/page.tsx` (replace with minimal placeholder)
+  - [x] Verify `npm run dev` starts cleanly
 
 ## Dev Notes
 
@@ -317,8 +317,61 @@ awesome-todo/
 
 ### Agent Model Used
 
+Claude Opus 4.6 (1M context)
+
 ### Debug Log References
+
+- Prisma v7.8.0 uses driver adapters instead of direct DB connections; adapted from story's v5 patterns to use `@prisma/adapter-libsql` with `@libsql/client`
+- Prisma v7 generates client to `src/generated/prisma/client.ts` (no index barrel export); import path is `@/generated/prisma/client`
+- PrismaClient constructor requires options object with `adapter` property (no zero-arg constructor)
 
 ### Completion Notes List
 
+- Task 1: Initialized Next.js 16.2.4 project with TypeScript, Tailwind CSS v4, ESLint, App Router, src directory, npm
+- Task 2: Installed Prisma v7.8.0 with `@prisma/adapter-libsql` + `@libsql/client` for SQLite. Created Todo model with all required fields. Database created via `prisma db push`
+- Task 3: Created all shared library files: `prisma.ts` (singleton with LibSQL adapter), `types.ts` (Todo, ApiResponse, ApiError), `schemas.ts` (Zod validation), `apiHelpers.ts` (response utilities)
+- Task 4: Installed Vitest v4.1.5 with jsdom, @testing-library/react, @vitejs/plugin-react. Created vitest.config.ts. Added test scripts. 6 schema tests passing
+- Task 5: Installed Playwright v1.59.1 with @axe-core/playwright. Created playwright.config.ts. Created e2e/ directory. Installed Chromium browser
+- Task 6: Updated .gitignore with db files, test artifacts. Replaced boilerplate page.tsx with minimal placeholder. Build, tests, and lint all pass
+
 ### File List
+
+New files:
+- prisma/schema.prisma
+- prisma.config.ts
+- src/lib/prisma.ts
+- src/lib/types.ts
+- src/lib/schemas.ts
+- src/lib/apiHelpers.ts
+- src/lib/schemas.test.ts
+- vitest.config.ts
+- playwright.config.ts
+- .env
+- .env.example
+- .env.test
+- e2e/
+
+Modified files:
+- .gitignore
+- package.json
+- src/app/page.tsx
+
+Generated (gitignored):
+- dev.db
+- src/generated/prisma/
+
+### Review Findings
+
+- [x] [Review][Defer] Todo interface date type mismatch — `createdAt`/`updatedAt` are `string` in `src/lib/types.ts` but Prisma returns `Date` objects. Best to address during serialization. [src/lib/types.ts:6-7] — deferred
+- [x] [Review][Patch] DATABASE_URL non-null assertion will crash with opaque error if env var missing — add validation guard [src/lib/prisma.ts:7] — fixed
+- [x] [Review][Patch] `.env*` gitignore glob excludes `.env.example` and `.env.test` — add exceptions for non-secret env files [.gitignore:34] — fixed
+- [x] [Review][Patch] `prisma` and `dotenv` should be devDependencies, not production dependencies [package.json] — fixed
+- [x] [Review][Patch] Layout metadata still says "Create Next App" — update to "Awesome Todo" [src/app/layout.tsx:16-17] — fixed
+- [x] [Review][Patch] CreateTodoSchema allows whitespace-only titles — add `.trim()` before `.min(1)` [src/lib/schemas.ts:4] — fixed
+- [x] [Review][Patch] Body `font-family: Arial` in globals.css overrides Geist font variables loaded in layout.tsx [src/app/globals.css:24] — fixed
+- [x] [Review][Defer] UpdateTodoSchema accepts empty object `{}` as valid — no API consumers yet, revisit in Story 1.2 [src/lib/schemas.ts:7-9] — deferred, pre-existing
+- [x] [Review][Defer] No Prisma migrations committed — spec uses `db push` for this story, migrations needed for production deployment — deferred, pre-existing
+
+### Change Log
+
+- 2026-04-24: Story 1.1 implemented — Full project initialization with Next.js 16, Prisma 7 (SQLite via LibSQL adapter), Zod schemas, Vitest, Playwright, shared types/helpers

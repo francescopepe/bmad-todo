@@ -19,18 +19,48 @@ describe('CreateTodoSchema', () => {
 });
 
 describe('UpdateTodoSchema', () => {
-  it('accepts an optional title', () => {
+  it('accepts a valid title-only update', () => {
     const result = UpdateTodoSchema.safeParse({ title: 'Updated title' });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({ title: 'Updated title' });
+    }
   });
 
-  it('accepts an optional completed flag', () => {
+  it('accepts a valid completed-only update', () => {
     const result = UpdateTodoSchema.safeParse({ completed: true });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({ completed: true });
+    }
   });
 
-  it('accepts an empty object', () => {
-    const result = UpdateTodoSchema.safeParse({});
+  it('accepts both title and completed', () => {
+    const result = UpdateTodoSchema.safeParse({ title: 'New', completed: false });
     expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual({ title: 'New', completed: false });
+    }
+  });
+
+  it('rejects an empty object', () => {
+    const result = UpdateTodoSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects unknown properties', () => {
+    const result = UpdateTodoSchema.safeParse({ title: 'Valid', extra: true });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects whitespace-only title', () => {
+    const result = UpdateTodoSchema.safeParse({ title: '   ' });
+    expect(result.success).toBe(false);
+  });
+
+  it('preserves ZodObject type (has .shape)', () => {
+    expect(UpdateTodoSchema.shape).toBeDefined();
+    expect(UpdateTodoSchema.shape.title).toBeDefined();
+    expect(UpdateTodoSchema.shape.completed).toBeDefined();
   });
 });

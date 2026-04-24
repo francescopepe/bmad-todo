@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   test: {
     environment: 'jsdom',
+    fileParallelism: false,
     setupFiles: [],
     include: ['src/**/*.test.{ts,tsx}'],
     coverage: {

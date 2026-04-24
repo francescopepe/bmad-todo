@@ -1,5 +1,5 @@
 # generated: 2026-04-24
-# last_updated: 2026-04-24T23:45:00Z
+# last_updated: 2026-04-24T17:56:00
 # project: Awesome Todo
 # project_key: NOKEY
 # tracking_system: file-system
@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-04-24
-last_updated: 2026-04-24T17:15:00Z
+last_updated: 2026-04-24
 project: Awesome Todo
 project_key: NOKEY
 
@@ -44,17 +44,17 @@ story_location: _bmad-output/implementation-artifacts
 
 development_status:
   # Epic 1: Project Foundation & Core Task Creation
-  epic-1: in-progress
+  epic-1: done
   1-1-project-initialization-and-data-layer: done
-  1-2-todo-api-create-and-list-endpoints: backlog
-  1-3-health-check-endpoint: backlog
-  1-4-design-tokens-and-core-layout: backlog
-  1-5-task-creation-ui-and-optimistic-add: backlog
-  epic-1-retrospective: optional
+  1-2-todo-api-create-and-list-endpoints: done
+  1-3-health-check-endpoint: done
+  1-4-design-tokens-and-core-layout: done
+  1-5-task-creation-ui-and-optimistic-add: done
+  epic-1-retrospective: done
 
   # Epic 2: Complete Task Lifecycle
-  epic-2: backlog
-  2-1-todo-api-update-and-delete-endpoints: backlog
+  epic-2: in-progress
+  2-1-todo-api-update-and-delete-endpoints: done
   2-2-task-completion-toggle: backlog
   2-3-inline-task-editing: backlog
   2-4-task-deletion: backlog

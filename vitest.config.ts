@@ -16,6 +16,10 @@ export default defineConfig({
       reporter: ['text', 'html'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/*.test.{ts,tsx}', 'src/**/*.d.ts'],
+      thresholds: {
+        statements: 70,
+        lines: 70,
+      },
     },
   },
   resolve: {

@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Awesome Todo
 
-## Getting Started
+A single-user task management application built as an SPA with a REST API backend, using SQLite for persistence. Designed as a portfolio project demonstrating modern full-stack development with AI-assisted workflows.
 
-First, run the development server:
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **UI:** React 19, Tailwind CSS 4
+- **Language:** TypeScript 5
+- **Database:** SQLite via Prisma 7 ORM (with libSQL adapter)
+- **Validation:** Zod 4
+- **Testing:** Vitest, Playwright, axe-core, Lighthouse
+
+## Prerequisites
+
+- Node.js (v20+)
+- npm
+- Docker or Podman (optional, for containerized deployment)
+
+## Setup
 
 ```bash
+# Clone the repository
+git clone <repo-url>
+cd bmad-todo
+
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+
+# Initialize the database
+npx prisma db push
+
+# Start the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Development Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm test` | Run unit/component tests |
+| `npm run test:watch` | Run tests in watch mode |
+| `npm run test:coverage` | Run tests with coverage report |
+| `npm run test:e2e` | Run Playwright E2E tests |
+| `npm run test:lighthouse` | Run Lighthouse performance audit |
 
-## Learn More
+## Testing
 
-To learn more about Next.js, take a look at the following resources:
+- **Unit/Component tests:** 147+ tests using Vitest and Testing Library (88%+ coverage)
+- **E2E tests:** 16+ tests using Playwright (CRUD, empty state, accessibility, security headers)
+- **Accessibility:** axe-core automated checks and Lighthouse audits
+- **Coverage thresholds:** 70% statements/lines enforced in CI
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Docker Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project supports both Docker and Podman. Use the container engine proxy script for all container commands:
 
-## Deploy on Vercel
+```bash
+# Build the image
+./scripts/container-engine.sh build -t awesome-todo .
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Run with compose
+./scripts/container-engine.sh compose up -d
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The `docker-compose.yml` provides:
+- Multi-stage build for minimal image size
+- Named volume (`todo-data`) for SQLite persistence
+- Health check at `/api/health`
+- Automatic restart (`unless-stopped`)
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/
+│   │   ├── health/route.ts    # Health check endpoint
+│   │   └── todos/
+│   │       ├── route.ts       # GET, POST /api/todos
+│   │       └── [id]/route.ts  # PATCH, DELETE /api/todos/:id
+│   ├── layout.tsx             # Root layout
+│   └── page.tsx               # Main todo page
+├── components/
+│   ├── TodoForm.tsx           # Task creation form
+│   ├── TodoItem.tsx           # Individual task component
+│   └── Toast.tsx              # Notification system
+├── hooks/
+│   └── useTodos.ts            # Todo state management with optimistic updates
+├── lib/
+│   ├── apiHelpers.ts          # API response utilities
+│   ├── prisma.ts              # Prisma client singleton
+│   ├── schemas.ts             # Zod validation schemas
+│   └── types.ts               # TypeScript type definitions
+└── generated/prisma/          # Prisma generated client
+e2e/                           # Playwright E2E tests
+prisma/schema.prisma           # Database schema
+scripts/
+├── container-engine.sh        # Docker/Podman proxy
+└── lighthouse-audit.mjs       # Lighthouse CI script
+```
+
+## Security
+
+Security headers (`X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`) are configured in `next.config.ts`. See [SECURITY-REVIEW.md](SECURITY-REVIEW.md) for the full security audit.
+
+## AI-Assisted Development
+
+This project was built using the BMad Method with Claude Code. See [AI-INTEGRATION-LOG.md](AI-INTEGRATION-LOG.md) for details on the AI-assisted development process.

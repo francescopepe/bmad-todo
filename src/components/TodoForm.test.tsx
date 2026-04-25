@@ -73,6 +73,19 @@ describe('TodoForm', () => {
     expect(input.value).toBe('');
   });
 
+  it('refocuses input after successful submit', () => {
+    const onAddTodo = vi.fn();
+    render(<TodoForm onAddTodo={onAddTodo} />);
+
+    const input = screen.getByPlaceholderText('Add a new task...');
+    const focusSpy = vi.spyOn(input, 'focus');
+
+    fireEvent.change(input, { target: { value: 'A task' } });
+    fireEvent.submit(input.closest('form')!);
+
+    expect(focusSpy).toHaveBeenCalled();
+  });
+
   it('Add button has min 44x44px touch target', () => {
     render(<TodoForm onAddTodo={vi.fn()} />);
 

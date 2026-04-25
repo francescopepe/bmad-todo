@@ -77,6 +77,7 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
           type="text"
           value={editText}
           maxLength={500}
+          aria-label={`Edit "${todo.title}"`}
           onChange={(e) => setEditText(e.target.value)}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
@@ -94,7 +95,7 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
           >
             {todo.title}
           </span>
-          <div className="flex gap-2 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-within:opacity-100 transition-opacity duration-200">
+          <div className="flex gap-2 [@media(hover:hover)]:sr-only [@media(hover:hover)]:group-hover:not-sr-only [@media(hover:hover)]:focus-within:not-sr-only">
             <button
               onClick={enterEditMode}
               className="min-h-[44px] min-w-[44px] rounded border border-text-secondary bg-transparent px-3 py-1 text-[0.875rem] font-medium text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary"

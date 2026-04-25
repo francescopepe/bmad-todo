@@ -106,6 +106,40 @@ describe('useTodos', () => {
     });
   });
 
+  describe('retry', () => {
+    it('clears error and re-fetches todos', async () => {
+      vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('Network error'));
+
+      const ref = renderHook();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('error')).toBeDefined();
+      });
+
+      expect(screen.getByTestId('error').textContent).toBe('Failed to load todos');
+
+      // Setup successful retry
+      const retryResponse: ApiResponse<Todo[]> = { data: [fakeTodo], success: true };
+      vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+        new Response(JSON.stringify(retryResponse), { status: 200 }),
+      );
+
+      act(() => {
+        ref.current!.retry();
+      });
+
+      // Should show loading again
+      expect(screen.getByTestId('loading')).toBeDefined();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('loading')).toBeNull();
+      });
+
+      expect(screen.queryByTestId('error')).toBeNull();
+      expect(screen.getByTestId('count').textContent).toBe('1');
+    });
+  });
+
   describe('addTodo — optimistic update', () => {
     it('adds todo optimistically then replaces with server response', async () => {
       const fetchResponse: ApiResponse<Todo[]> = { data: [], success: true };
@@ -135,6 +169,48 @@ describe('useTodos', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title: 'Test task' }),
       });
+    });
+
+    it('shows optimistic todo in state BEFORE the POST resolves', async () => {
+      const fetchResponse: ApiResponse<Todo[]> = { data: [], success: true };
+      const createResponse: ApiResponse<Todo> = { data: fakeTodo, success: true };
+
+      // Deferred promise pattern: control when the POST resolves
+      let resolveFetch!: (value: Response) => void;
+      const deferredPost = new Promise<Response>((resolve) => {
+        resolveFetch = resolve;
+      });
+
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(JSON.stringify(fetchResponse), { status: 200 }))
+        .mockReturnValueOnce(deferredPost as Promise<Response>);
+
+      const ref = renderHook();
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('loading')).toBeNull();
+      });
+
+      expect(screen.getByTestId('count').textContent).toBe('0');
+
+      // Start addTodo but DON'T await it — the POST hasn't resolved yet
+      let addPromise: Promise<void>;
+      act(() => {
+        addPromise = ref.current!.addTodo('Test task');
+      });
+
+      // The optimistic todo should be visible immediately, before POST resolves
+      expect(screen.getByTestId('count').textContent).toBe('1');
+
+      // Now resolve the POST and let everything settle
+      await act(async () => {
+        resolveFetch(new Response(JSON.stringify(createResponse), { status: 201 }));
+        await addPromise!;
+      });
+
+      // Still 1 todo after resolution (server data replaces optimistic)
+      expect(screen.getByTestId('count').textContent).toBe('1');
+      expect(screen.getByTestId('todo-abc123')).toBeDefined();
     });
 
     it('rolls back optimistic add on API failure', async () => {

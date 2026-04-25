@@ -11,6 +11,7 @@ export interface UseTodosReturn {
   todos: Todo[];
   isLoading: boolean;
   error: string | null;
+  retry: () => void;
   addTodo: (title: string) => Promise<void>;
   toggleTodo: (id: string) => Promise<void>;
   updateTodo: (id: string, title: string) => Promise<void>;
@@ -21,8 +22,15 @@ export function useTodos(options?: UseTodosOptions): UseTodosReturn {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetchKey, setFetchKey] = useState(0);
   const todosRef = useRef(todos);
   todosRef.current = todos;
+
+  const retry = useCallback(() => {
+    setError(null);
+    setIsLoading(true);
+    setFetchKey(k => k + 1);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,7 +64,7 @@ export function useTodos(options?: UseTodosOptions): UseTodosReturn {
 
     fetchTodos();
     return () => { cancelled = true; };
-  }, []);
+  }, [fetchKey]);
 
   const addTodo = useCallback(async (title: string) => {
     const tempId = `temp-${Date.now()}`;
@@ -198,5 +206,5 @@ export function useTodos(options?: UseTodosOptions): UseTodosReturn {
     }
   }, [options?.onError]);
 
-  return { todos, isLoading, error, addTodo, toggleTodo, updateTodo, deleteTodo };
+  return { todos, isLoading, error, retry, addTodo, toggleTodo, updateTodo, deleteTodo };
 }

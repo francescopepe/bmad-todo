@@ -162,6 +162,20 @@ describe('TodoItem', () => {
       expect(screen.getByText('Buy groceries')).toBeDefined();
     });
 
+    it('Escape followed by blur does not trigger a save (no double call)', () => {
+      const onEdit = vi.fn();
+      render(<TodoItem todo={activeTodo} onToggle={noop} onEdit={onEdit} onDelete={noop} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+      const input = screen.getByRole('textbox');
+      fireEvent.change(input, { target: { value: 'Changed text' } });
+      fireEvent.keyDown(input, { key: 'Escape' });
+      // Blur fires after Escape in real browsers — should NOT trigger save
+      fireEvent.blur(input);
+
+      expect(onEdit).not.toHaveBeenCalled();
+    });
+
     it('empty/whitespace-only text is treated as cancel (no onEdit call)', () => {
       const onEdit = vi.fn();
       render(<TodoItem todo={activeTodo} onToggle={noop} onEdit={onEdit} onDelete={noop} />);
@@ -226,9 +240,9 @@ describe('TodoItem', () => {
 
       const editBtn = screen.getByRole('button', { name: 'Edit' });
       const container = editBtn.parentElement!;
-      expect(container.className).toContain('[@media(hover:hover)]:opacity-0');
-      expect(container.className).toContain('[@media(hover:hover)]:group-hover:opacity-100');
-      expect(container.className).toContain('[@media(hover:hover)]:focus-within:opacity-100');
+      expect(container.className).toContain('[@media(hover:hover)]:sr-only');
+      expect(container.className).toContain('[@media(hover:hover)]:group-hover:not-sr-only');
+      expect(container.className).toContain('[@media(hover:hover)]:focus-within:not-sr-only');
     });
   });
 

@@ -23,6 +23,26 @@
 - **SQLite crash safety and WAL recovery in Docker volumes** — OOM kill or SIGKILL may leave WAL files; `restart: unless-stopped` could restart into corrupted state. Known SQLite-in-Docker tradeoff.
 - **No resource limits on container** — No `mem_limit`/`cpus` constraints in `docker-compose.yml`. Production hardening, out of scope for portfolio project.
 
+## Deferred from: code review of 5-1-e2e-test-suite (2026-04-25)
+
+- **Duplicated `deleteAllTodos` helper across spec files** — The identical cleanup function is copy-pasted in `e2e/todo-crud.spec.ts` and `e2e/empty-state.spec.ts`. Extract to a shared Playwright fixture or utility when the test suite grows beyond 2 spec files.
+
+## Deferred from: code review of 5-2-test-coverage-and-unit-tests (2026-04-25)
+
+- **Retry doesn't abort in-flight fetch (no AbortController)** — The `useTodos` retry mechanism uses a `cancelled` flag to prevent stale state writes, but never aborts the HTTP request itself. Rapid retries produce parallel requests. Correctness is maintained; this is a network efficiency optimization.
+- **No test for concurrent mutation + retry overlap** — No test verifies behavior when a mutation (add/toggle/update/delete) is in-flight and `retry()` fires simultaneously. The fetch response could overwrite optimistic state from in-flight mutations.
+
+## Deferred from: code review of 5-3-accessibility-audit (2026-04-25)
+
+- **`deleteTodo` rollback uses full array replacement, discarding concurrent optimistic updates** — `setTodos(savedTodos)` replaces entire state rather than using a functional updater like other mutations. If a concurrent mutation applies an optimistic update while a delete is in-flight, the rollback overwrites it. Pre-existing pattern, not introduced by story 5-3.
+- **Lighthouse audit script has no timeout** — `scripts/lighthouse-audit.mjs` has no timeout on `chrome-launcher` or `lighthouse()`. Can hang indefinitely in CI if Chrome is unresponsive or URL is unreachable. Nice-to-have hardening.
+
+## Deferred from: code review of 5-4-security-review-and-documentation (2026-04-25)
+
+- **sr-only pattern may cause layout reflow on hover** — The `sr-only`→`not-sr-only` toggle removes/re-inserts elements from visual flow, unlike the old opacity approach. May cause visual jump on hover. Pre-existing from story 5-3 accessibility work.
+- **Toast ID counter unbounded** — `nextId.current++` never resets. Theoretical overflow at 2^53 — extremely unlikely in practice. Pre-existing.
+- **Sequential Playwright execution masks concurrency bugs** — `workers: 1` is necessary for shared SQLite but hides potential race conditions under concurrent load. Separate concurrency testing would be needed for production hardening.
+
 ## Closed — Already Fixed
 
 - ~~**UpdateTodoSchema accepts empty object**~~ — Fixed in Story 2.1. _(Origin: 1.1 review)_

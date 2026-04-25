@@ -13,13 +13,13 @@ export default function Home() {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const nextId = useRef(0);
   const addToast = useCallback((message: string) => {
-    setToasts(prev => [...prev, { id: nextId.current++, message }]);
+    setToasts(prev => [...prev.slice(-4), { id: nextId.current++, message }]);
   }, []);
   const removeToast = useCallback((id: number) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
-  const { todos, isLoading, error, addTodo, toggleTodo, updateTodo, deleteTodo } = useTodos({ onError: addToast });
+  const { todos, isLoading, error, retry, addTodo, toggleTodo, updateTodo, deleteTodo } = useTodos({ onError: addToast });
 
   return (
     <main className="mx-auto max-w-[640px] px-4 md:px-8 py-8 md:py-12">
@@ -30,7 +30,15 @@ export default function Home() {
       {isLoading ? (
         <LoadingSpinner />
       ) : error ? (
-        <p className="text-center text-error py-12">{error}</p>
+        <div className="text-center py-12">
+          <p className="text-error">{error}</p>
+          <button
+            onClick={retry}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded font-medium hover:bg-primary-hover transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          >
+            Retry
+          </button>
+        </div>
       ) : (
         <>
           <TodoForm onAddTodo={addTodo} />

@@ -1,7 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { Todo, ApiResponse } from '@/lib/types';
+
+export interface UseTodosOptions {
+  onError?: (message: string) => void;
+}
 
 export interface UseTodosReturn {
   todos: Todo[];
@@ -13,10 +17,12 @@ export interface UseTodosReturn {
   deleteTodo: (id: string) => Promise<void>;
 }
 
-export function useTodos(): UseTodosReturn {
+export function useTodos(options?: UseTodosOptions): UseTodosReturn {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const todosRef = useRef(todos);
+  todosRef.current = todos;
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +78,7 @@ export function useTodos(): UseTodosReturn {
       });
       if (!res.ok) {
         setTodos((prev) => prev.filter((t) => t.id !== tempId));
+        options?.onError?.("Couldn't add task. Try again.");
         return;
       }
       const json: ApiResponse<Todo> = await res.json();
@@ -80,16 +87,116 @@ export function useTodos(): UseTodosReturn {
         setTodos((prev) => prev.map((t) => (t.id === tempId ? json.data! : t)));
       } else {
         setTodos((prev) => prev.filter((t) => t.id !== tempId));
+        options?.onError?.("Couldn't add task. Try again.");
       }
     } catch {
       setTodos((prev) => prev.filter((t) => t.id !== tempId));
+      options?.onError?.("Couldn't add task. Try again.");
     }
-  }, []);
+  }, [options?.onError]);
 
-  // Stubs — implemented in Epic 2
-  const toggleTodo: UseTodosReturn['toggleTodo'] = useCallback(async () => {}, []);
-  const updateTodo: UseTodosReturn['updateTodo'] = useCallback(async () => {}, []);
-  const deleteTodo: UseTodosReturn['deleteTodo'] = useCallback(async () => {}, []);
+  const toggleTodo = useCallback(async (id: string) => {
+    const todo = todosRef.current.find((t) => t.id === id);
+    if (!todo) return;
+
+    const savedTodo = { ...todo };
+    const newCompleted = !todo.completed;
+
+    // Optimistic update
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, completed: newCompleted } : t)),
+    );
+
+    try {
+      const res = await fetch(`/api/todos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: newCompleted }),
+      });
+
+      if (!res.ok) {
+        setTodos((prev) => prev.map((t) => (t.id === id ? savedTodo : t)));
+        options?.onError?.("Couldn't update task. Try again.");
+        return;
+      }
+
+      const json: ApiResponse<Todo> = await res.json();
+
+      if (json.success && json.data) {
+        setTodos((prev) =>
+          prev.map((t) => (t.id === id ? json.data! : t)),
+        );
+      } else {
+        setTodos((prev) => prev.map((t) => (t.id === id ? savedTodo : t)));
+        options?.onError?.("Couldn't update task. Try again.");
+      }
+    } catch {
+      setTodos((prev) => prev.map((t) => (t.id === id ? savedTodo : t)));
+      options?.onError?.("Couldn't update task. Try again.");
+    }
+  }, [options?.onError]);
+
+  const updateTodo = useCallback(async (id: string, title: string) => {
+    const todo = todosRef.current.find((t) => t.id === id);
+    if (!todo) return;
+
+    const savedTodo = { ...todo };
+
+    // Optimistic update
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, title } : t)),
+    );
+
+    try {
+      const res = await fetch(`/api/todos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title }),
+      });
+
+      if (!res.ok) {
+        setTodos((prev) => prev.map((t) => (t.id === id ? savedTodo : t)));
+        options?.onError?.("Couldn't save edit. Try again.");
+        return;
+      }
+
+      const json: ApiResponse<Todo> = await res.json();
+
+      if (json.success && json.data) {
+        setTodos((prev) =>
+          prev.map((t) => (t.id === id ? json.data! : t)),
+        );
+      } else {
+        setTodos((prev) => prev.map((t) => (t.id === id ? savedTodo : t)));
+        options?.onError?.("Couldn't save edit. Try again.");
+      }
+    } catch {
+      setTodos((prev) => prev.map((t) => (t.id === id ? savedTodo : t)));
+      options?.onError?.("Couldn't save edit. Try again.");
+    }
+  }, [options?.onError]);
+
+  const deleteTodo = useCallback(async (id: string) => {
+    const todo = todosRef.current.find((t) => t.id === id);
+    if (!todo) return;
+
+    const savedTodos = todosRef.current;
+
+    // Optimistic removal
+    setTodos((prev) => prev.filter((t) => t.id !== id));
+
+    try {
+      const res = await fetch(`/api/todos/${id}`, { method: 'DELETE' });
+
+      if (!res.ok) {
+        setTodos(savedTodos);
+        options?.onError?.("Couldn't delete task. Try again.");
+      }
+    } catch {
+      setTodos(savedTodos);
+      options?.onError?.("Couldn't delete task. Try again.");
+    }
+  }, [options?.onError]);
 
   return { todos, isLoading, error, addTodo, toggleTodo, updateTodo, deleteTodo };
 }

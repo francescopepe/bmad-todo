@@ -1,30 +1,18 @@
 import type { Todo } from '@/lib/types';
+import { TodoItem } from '@/components/TodoItem';
 
 interface TodoListProps {
   todos: Todo[];
+  onToggle: (id: string) => void;
+  onEdit: (id: string, title: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export function TodoList({ todos }: TodoListProps) {
+export function TodoList({ todos, onToggle, onEdit, onDelete }: TodoListProps) {
   return (
     <ul className="space-y-1">
       {todos.map((todo) => (
-        <li key={todo.id} className="flex items-center gap-3 py-2">
-          <input
-            type="checkbox"
-            checked={todo.completed}
-            disabled
-            className="h-4 w-4 rounded border-border"
-          />
-          <span
-            className={
-              todo.completed
-                ? 'line-through text-text-completed'
-                : 'text-text-primary'
-            }
-          >
-            {todo.title}
-          </span>
-        </li>
+        <TodoItem key={todo.id} todo={todo} onToggle={onToggle} onEdit={onEdit} onDelete={onDelete} />
       ))}
     </ul>
   );

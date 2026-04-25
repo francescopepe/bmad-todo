@@ -11,4 +11,15 @@ describe('LoadingSpinner', () => {
     render(<LoadingSpinner />);
     expect(screen.getByLabelText('Loading tasks')).toBeDefined();
   });
+
+  it('has role="status" for screen reader announcement', () => {
+    render(<LoadingSpinner />);
+    expect(screen.getByRole('status')).toBeDefined();
+  });
+
+  it('aria-label is "Loading tasks"', () => {
+    render(<LoadingSpinner />);
+    const spinner = screen.getByRole('status');
+    expect(spinner.getAttribute('aria-label')).toBe('Loading tasks');
+  });
 });

@@ -8,6 +8,9 @@ export default defineConfig({
     environment: 'jsdom',
     fileParallelism: false,
     setupFiles: [],
+    env: require('fs').existsSync('.env.test')
+      ? { ...require('dotenv').parse(require('fs').readFileSync('.env.test', 'utf-8')) }
+      : {},
     include: ['src/**/*.test.{ts,tsx}'],
     coverage: {
       reporter: ['text', 'html'],

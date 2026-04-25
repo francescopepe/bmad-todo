@@ -32,12 +32,12 @@ export function TodoForm({ onAddTodo }: TodoFormProps) {
         onChange={(e) => setValue(e.target.value)}
         placeholder="Add a new task..."
         maxLength={500}
-        className="flex-1 text-base border-0 border-b border-border focus:border-primary outline-none py-2 bg-transparent text-text-primary placeholder:text-text-secondary"
+        className="flex-1 text-base border-0 border-b border-border focus:border-primary focus:ring-2 focus:ring-primary outline-none py-2 min-h-[44px] bg-transparent text-text-primary placeholder:text-text-secondary"
         autoFocus
       />
       <button
         type="submit"
-        className="bg-primary text-white px-4 py-2 rounded font-medium hover:bg-primary-hover transition-colors"
+        className="bg-primary text-white px-4 py-2 min-h-[44px] rounded font-medium hover:bg-primary-hover transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       >
         Add
       </button>

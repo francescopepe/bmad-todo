@@ -1,30 +1,37 @@
 # Deferred Work
 
-## Deferred from: code review of 1-1-project-initialization-and-data-layer (2026-04-24)
+> Triaged during Epic 3 retrospective (2026-04-25). Items are either CLOSED (fixed, accepted risk, or won't-fix) or assigned a target epic/story.
 
-- **UpdateTodoSchema accepts empty object** — Both `title` and `completed` are optional with no refinement requiring at least one field. A no-op update will still bump `updatedAt`. Revisit when API routes are implemented in Story 1.2.
-- **Todo interface date type mismatch** — `createdAt`/`updatedAt` typed as `string` in `src/lib/types.ts` but Prisma returns `Date`. Best to address during serialization when API routes are built (Story 1.2).
-- **No Prisma migrations committed** — The spec uses `prisma db push` for local dev, but `prisma/migrations/` is empty. Production/CI deployment via `prisma migrate deploy` will fail without committed migrations. Address before Epic 4 (Docker deployment).
+## Open — Target: Epic 4 (prerequisite)
 
-## Deferred from: code review of 1-2-todo-api-create-and-list-endpoints (2026-04-24)
+- **No Prisma migrations committed** — The spec uses `prisma db push` for local dev, but `prisma/migrations/` is empty. Production/CI deployment via `prisma migrate deploy` will fail without committed migrations. Must be resolved before Story 4.2. _(Origin: 1.1 review)_
 
-- **No structured error logging in API handlers** — Both GET and POST in `src/app/api/todos/route.ts` catch errors and return 500 but log nothing. Database outages and unexpected errors will be invisible. Pre-existing gap — spec forbids `console.log` but structured logging (e.g., pino, Next.js logger) was never set up. Address when observability requirements are defined.
+## Open — Target: Epic 5 (Story 5.2 — Test Coverage & Unit Tests)
 
-## Deferred from: code review of 1-3-health-check-endpoint (2026-04-24)
+- **No test for input refocus after submit** — AC1 specifies the input refocuses after submission. The behavior is implemented (`inputRef.current?.focus()`) but no test asserts post-submit focus. _(Origin: 1.5 review)_
+- **`useTodos` test doesn't verify optimistic timing** — The test awaits the full `addTodo` call, so it never asserts the todo is visible *before* the POST resolves. The optimistic pattern works correctly; the test gap is coverage-only. _(Origin: 1.5 review)_
+- **Toast accumulates unboundedly under rapid failures** — No max-length guard on the `toasts` array in `page.tsx`. Add a cap (e.g., max 5 toasts) during test/quality pass. _(Origin: 3.2 review)_
+- **Initial fetch error not clearable (no retry mechanism)** — If the initial GET /api/todos fails, the error state renders a dead-end `<p>` with no retry button. Add retry button during test/quality pass. _(Origin: 1.5 review, also flagged in 2.2 and 3.1 reviews)_
+- **`vitest.config.ts` conditional `require('dotenv')` may fail** — Config loads `dotenv` via `require()` only if `.env.test` exists, but `dotenv` may not be in `devDependencies`. Fix during test infrastructure cleanup. _(Origin: 2.5 review)_
+- **`fileParallelism: false` disables test parallelism globally** — Forces all test files to run sequentially. Consider vitest workspace configs to scope to integration tests only. _(Origin: 2.1 review)_
+- **No `global-error.tsx` for layout-level errors** — The custom ErrorBoundary catches child page errors but not layout-level errors. Low priority, narrow risk. _(Origin: 2.6 review)_
 
-- **`.refine()` changes UpdateTodoSchema to ZodEffects** — Adding `.refine()` converts the schema from `ZodObject` to `ZodEffects`, meaning `.shape`, `.pick()`, `.extend()`, and `.partial()` will not work. Address when the update route is implemented in Story 2-1.
-- **Extra/unknown properties pass through UpdateTodoSchema** — No `.strict()` or `.strip()` on the `z.object()`. Unexpected keys survive parsing and could reach the database layer. Address when the update route is implemented in Story 2-1.
+## Closed — Already Fixed
 
-## Deferred from: code review of 1-4-design-tokens-and-core-layout (2026-04-24)
+- ~~**UpdateTodoSchema accepts empty object**~~ — Fixed in Story 2.1. _(Origin: 1.1 review)_
+- ~~**Todo interface date type mismatch**~~ — Fixed during API serialization. _(Origin: 1.1 review)_
+- ~~**`.refine()` changes UpdateTodoSchema to ZodEffects**~~ — Fixed in Story 2.1. _(Origin: 1.3 review)_
+- ~~**Extra/unknown properties pass through UpdateTodoSchema**~~ — Fixed in Story 2.1. _(Origin: 1.3 review)_
+- ~~**`addTodo` failures produce no user feedback**~~ — Fixed in Story 2.5 (Toast system). _(Origin: 1.5 review)_
 
-- **`text-text-primary` naming collision** — `text-primary` utility maps to the blue accent color (#2563EB) not the primary text color (#111827). Future contributors will likely write `text-primary` expecting text color. The correct utility is `text-text-primary`. Consider renaming tokens (e.g., `--color-accent` instead of `--color-primary`) if confusion arises.
+## Closed — Accepted Risk
 
-## Deferred from: code review of 1-5-task-creation-ui-and-optimistic-add (2026-04-24)
-
-- **No test for input refocus after submit** — AC1 specifies the input refocuses after submission. The behavior is implemented (`inputRef.current?.focus()`) but no test asserts post-submit focus. Address in Epic 5 test coverage story.
-- **`useTodos` test doesn't verify optimistic timing** — The test awaits the full `addTodo` call, so it never asserts the todo is visible *before* the POST resolves. The optimistic pattern works correctly; the test gap is coverage-only. Address in Epic 5.
-- **`addTodo` failures produce no user feedback** — When `addTodo` fails, the optimistic todo is silently removed with no error message or toast. Spec defers toast notifications to Story 2.5.
-
-## Deferred from: code review of 2-1-todo-api-update-and-delete-endpoints (2026-04-24)
-
-- **`fileParallelism: false` disables test parallelism globally** — Added to `vitest.config.ts` to prevent SQLite lock timeouts across integration test files. Correct for SQLite but forces all test files (including unit tests) to run sequentially. Consider vitest workspace configs or project-level overrides to scope this to integration tests only as the suite grows.
+- ~~**No structured error logging in API handlers**~~ — Out of scope for portfolio project. No observability requirements defined. _(Origin: 1.2 review)_
+- ~~**`text-text-primary` naming collision**~~ — Cosmetic naming issue, works correctly. Document for future contributors. _(Origin: 1.4 review)_
+- ~~**Empty/whitespace edit silently discards without feedback**~~ — Intentional cancel behavior per spec. _(Origin: 3.1 review)_
+- ~~**No debounce/disable on form submit allows duplicate adds**~~ — Narrow race, single-user app. Form clearing is implicit debounce. _(Origin: 1.5/3.1 review)_
+- ~~**Duplicate `Date.now()` temp IDs on rapid double-add**~~ — Sub-millisecond race, single-user app. _(Origin: 2.5 review)_
+- ~~**`deleteTodo` full-array rollback overwrites concurrent mutations**~~ — Documented single-user trade-off for position-preserving rollback. _(Origin: 2.4 review)_
+- ~~**Rapid double-toggle sends contradictory PATCHes**~~ — Narrow race window, single-user app. _(Origin: 2.4 review)_
+- ~~**Operating on temp-id todo before addTodo resolves hits 404**~~ — Edge case, single-user app. _(Origin: 2.4 review)_
+- ~~**Toast `slideOutTimer` race on rapid re-trigger**~~ — ~200ms window, minimal user impact. _(Origin: 2.3 review)_

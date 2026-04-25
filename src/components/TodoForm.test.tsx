@@ -73,10 +73,65 @@ describe('TodoForm', () => {
     expect(input.value).toBe('');
   });
 
+  it('Add button has min 44x44px touch target', () => {
+    render(<TodoForm onAddTodo={vi.fn()} />);
+
+    const button = screen.getByRole('button', { name: 'Add' });
+    expect(button.className).toContain('min-h-[44px]');
+  });
+
+  it('Input field has min 44px touch target for thumb interaction', () => {
+    render(<TodoForm onAddTodo={vi.fn()} />);
+
+    const input = screen.getByPlaceholderText('Add a new task...');
+    expect(input.className).toContain('min-h-[44px]');
+  });
+
   it('auto-focuses the input on mount', () => {
     render(<TodoForm onAddTodo={vi.fn()} />);
 
     const input = screen.getByPlaceholderText('Add a new task...');
     expect(input).toBe(document.activeElement);
+  });
+
+  describe('accessibility — focus rings and semantic HTML', () => {
+    it('input has focus ring classes', () => {
+      render(<TodoForm onAddTodo={vi.fn()} />);
+
+      const input = screen.getByPlaceholderText('Add a new task...');
+      expect(input.className).toContain('focus:ring-2');
+      expect(input.className).toContain('focus:ring-primary');
+    });
+
+    it('Add button has focus ring classes', () => {
+      render(<TodoForm onAddTodo={vi.fn()} />);
+
+      const button = screen.getByRole('button', { name: 'Add' });
+      expect(button.className).toContain('focus:ring-2');
+      expect(button.className).toContain('focus:ring-primary');
+      expect(button.className).toContain('focus:ring-offset-2');
+      expect(button.className).toContain('focus:outline-none');
+    });
+
+    it('wraps inputs in a <form> element', () => {
+      const { container } = render(<TodoForm onAddTodo={vi.fn()} />);
+
+      const form = container.querySelector('form');
+      expect(form).not.toBeNull();
+      expect(form!.querySelector('input')).not.toBeNull();
+      expect(form!.querySelector('button[type="submit"]')).not.toBeNull();
+    });
+
+    it('Enter key submits form via native form submission', () => {
+      const onAddTodo = vi.fn();
+      render(<TodoForm onAddTodo={onAddTodo} />);
+
+      const input = screen.getByPlaceholderText('Add a new task...');
+      fireEvent.change(input, { target: { value: 'New task' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
+      fireEvent.submit(input.closest('form')!);
+
+      expect(onAddTodo).toHaveBeenCalledWith('New task');
+    });
   });
 });

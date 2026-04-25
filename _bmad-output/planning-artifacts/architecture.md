@@ -49,7 +49,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 ### Technical Constraints & Dependencies
 
 - **Bundle size:** Under 200KB gzipped — eliminates component libraries (MUI, Ant Design), heavy state management (Redux), and large utility libraries
-- **Database:** SQLite via Prisma ORM — file-based, no separate database server needed, persisted via Docker volume
+- **Database:** SQLite via Prisma ORM with LibSQL adapter (`@prisma/adapter-libsql`) — file-based, no separate database server needed, persisted via Docker volume
 - **Deployment:** Docker required for MVP — application and database in container(s)
 - **No authentication:** Single implicit user — no auth middleware, no session management, no user model
 - **Extensibility requirement:** Architecture must not prevent future addition of auth, multi-user, priorities, filtering. This means: clean API contract, database adapter pattern, separated concerns.
@@ -154,7 +154,7 @@ npx create-next-app@latest awesome-todo --typescript --tailwind --eslint --app -
 
 ### Data Architecture
 
-**Database:** SQLite via Prisma ORM v7
+**Database:** SQLite via Prisma ORM v7 with LibSQL adapter (`@prisma/adapter-libsql`)
 
 **Data Model:**
 
@@ -186,15 +186,15 @@ interface ApiResponse<T> {
   error?: { message: string; code: string; details?: unknown };
 }
 
-// Zod schemas
-const CreateTodoSchema = z.object({ title: z.string().min(1).max(500) });
+// Zod schemas (Zod v4 — uses .strict().check() instead of v3's .refine())
+const CreateTodoSchema = z.object({ title: z.string().trim().min(1).max(500) });
 const UpdateTodoSchema = z.object({
-  title: z.string().min(1).max(500).optional(),
+  title: z.string().trim().min(1).max(500).optional(),
   completed: z.boolean().optional(),
-});
+}).strict().check(ctx => { /* at least one field required */ });
 ```
 
-**Migrations:** `prisma db push` for development, `prisma migrate deploy` for Docker production builds.
+**Migrations:** `prisma db push` for development. Docker production builds use `prisma migrate diff` to auto-generate SQL from `prisma/schema.prisma` via `init-db.mjs` at build time — no committed migration files needed.
 
 **Caching:** None. Single user, small dataset, SQLite direct queries are sufficient.
 
@@ -511,7 +511,7 @@ interface UseTodosReturn {
 | Zod validation | Reject malformed input | Return 400 with `VALIDATION_ERROR` code and field-level details |
 | API route handler | Catch database/business errors | Return appropriate status code with sanitized message |
 | `useTodos` hook | Handle API failures | Rollback optimistic state, call toast callback |
-| Toast component | Display error to user | Show message for 4 seconds, auto-dismiss |
+| Toast component | Display error to user | Show message for 4 seconds, auto-dismiss. Multi-toast stacking (max 5) with vertical 8px gap |
 | ErrorBoundary | Catch unhandled React errors | Render fallback UI with "Reload" button |
 
 **Loading State Pattern:**

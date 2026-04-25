@@ -6,15 +6,15 @@
 
 - ~~**No Prisma migrations committed**~~ — Superseded by `init-db.mjs` + `prisma migrate diff` approach implemented in Story 4.1. SQL is auto-generated from `prisma/schema.prisma` at Docker build time, maintaining single source of truth. Committed migrations are not needed for this deployment model. _(Origin: 1.1 review, closed: Epic 4 retro)_
 
-## Open — Target: Epic 5 (Story 5.2 — Test Coverage & Unit Tests)
+## Closed — Fixed in Epic 5 (Story 5.2, 2026-04-25)
 
-- **No test for input refocus after submit** — AC1 specifies the input refocuses after submission. The behavior is implemented (`inputRef.current?.focus()`) but no test asserts post-submit focus. _(Origin: 1.5 review)_
-- **`useTodos` test doesn't verify optimistic timing** — The test awaits the full `addTodo` call, so it never asserts the todo is visible *before* the POST resolves. The optimistic pattern works correctly; the test gap is coverage-only. _(Origin: 1.5 review)_
-- **Toast accumulates unboundedly under rapid failures** — No max-length guard on the `toasts` array in `page.tsx`. Add a cap (e.g., max 5 toasts) during test/quality pass. _(Origin: 3.2 review)_
-- **Initial fetch error not clearable (no retry mechanism)** — If the initial GET /api/todos fails, the error state renders a dead-end `<p>` with no retry button. Add retry button during test/quality pass. _(Origin: 1.5 review, also flagged in 2.2 and 3.1 reviews)_
-- **`vitest.config.ts` conditional `require('dotenv')` may fail** — Config loads `dotenv` via `require()` only if `.env.test` exists, but `dotenv` may not be in `devDependencies`. Fix during test infrastructure cleanup. _(Origin: 2.5 review)_
-- **`fileParallelism: false` disables test parallelism globally** — Forces all test files to run sequentially. Consider vitest workspace configs to scope to integration tests only. _(Origin: 2.1 review)_
-- **No `global-error.tsx` for layout-level errors** — The custom ErrorBoundary catches child page errors but not layout-level errors. Low priority, narrow risk. _(Origin: 2.6 review)_
+- ~~**No test for input refocus after submit**~~ — Fixed in Story 5.2. Added focus spy test to `TodoForm.test.tsx`. _(Origin: 1.5 review, closed: Story 5.2)_
+- ~~**`useTodos` test doesn't verify optimistic timing**~~ — Fixed in Story 5.2. Added deferred-promise test proving todo appears before POST resolves. _(Origin: 1.5 review, closed: Story 5.2)_
+- ~~**Toast accumulates unboundedly under rapid failures**~~ — Fixed in Story 5.2. Capped toasts at max 5 in `page.tsx`. _(Origin: 3.2 review, closed: Story 5.2)_
+- ~~**Initial fetch error not clearable (no retry mechanism)**~~ — Fixed in Story 5.2. Added `retry()` to `useTodos` hook and retry button to error state in `page.tsx`. _(Origin: 1.5 review, closed: Story 5.2)_
+- ~~**`vitest.config.ts` conditional `require('dotenv')` may fail**~~ — Verified safe in Story 5.2. Conditional `existsSync` guard works correctly; `dotenv` is in devDependencies. _(Origin: 2.5 review, closed: Story 5.2)_
+- ~~**`fileParallelism: false` disables test parallelism globally**~~ — Evaluated in Story 5.2, kept as-is. Sequential execution is a deliberate trade-off for SQLite-based integration test correctness. _(Origin: 2.1 review, closed: accepted trade-off)_
+- ~~**No `global-error.tsx` for layout-level errors**~~ — Not addressed in Epic 5. Low priority, narrow risk. Accepted for portfolio project scope. _(Origin: 2.6 review, closed: accepted risk)_
 
 ## Deferred from: code review of 4-2-docker-compose-and-data-persistence (2026-04-25)
 

@@ -403,6 +403,8 @@ So that my list stays relevant.
 
 ### Story 2.5: Toast Notification System
 
+> **Implementation note:** Stories 2.2-2.4 reference toast notifications in their error-handling ACs. During implementation, a minimal Toast component was introduced in Story 2.2 to satisfy those ACs, then expanded to full multi-toast stacking (max 5, vertical 8px gap) in Story 2.5. This pragmatic reordering avoided blocking three stories on a single dependency.
+
 As a **user**,
 I want to be informed when something goes wrong,
 So that I'm never uncertain about the state of my data.

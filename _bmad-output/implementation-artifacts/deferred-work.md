@@ -2,9 +2,9 @@
 
 > Triaged during Epic 3 retrospective (2026-04-25). Items are either CLOSED (fixed, accepted risk, or won't-fix) or assigned a target epic/story.
 
-## Open — Target: Epic 4 (prerequisite)
+## Closed — Superseded (Epic 4 retrospective, 2026-04-25)
 
-- **No Prisma migrations committed** — The spec uses `prisma db push` for local dev, but `prisma/migrations/` is empty. Production/CI deployment via `prisma migrate deploy` will fail without committed migrations. Must be resolved before Story 4.2. _(Origin: 1.1 review)_
+- ~~**No Prisma migrations committed**~~ — Superseded by `init-db.mjs` + `prisma migrate diff` approach implemented in Story 4.1. SQL is auto-generated from `prisma/schema.prisma` at Docker build time, maintaining single source of truth. Committed migrations are not needed for this deployment model. _(Origin: 1.1 review, closed: Epic 4 retro)_
 
 ## Open — Target: Epic 5 (Story 5.2 — Test Coverage & Unit Tests)
 
@@ -15,6 +15,13 @@
 - **`vitest.config.ts` conditional `require('dotenv')` may fail** — Config loads `dotenv` via `require()` only if `.env.test` exists, but `dotenv` may not be in `devDependencies`. Fix during test infrastructure cleanup. _(Origin: 2.5 review)_
 - **`fileParallelism: false` disables test parallelism globally** — Forces all test files to run sequentially. Consider vitest workspace configs to scope to integration tests only. _(Origin: 2.1 review)_
 - **No `global-error.tsx` for layout-level errors** — The custom ErrorBoundary catches child page errors but not layout-level errors. Low priority, narrow risk. _(Origin: 2.6 review)_
+
+## Deferred from: code review of 4-2-docker-compose-and-data-persistence (2026-04-25)
+
+- **Podman compose compatibility gap** — `docker-compose.yml` cannot be invoked through `container-engine.sh` for Podman users relying on `podman-compose`. `podman compose` subcommand works. Out of scope for this story.
+- **`docker info` probe can stall 30+ seconds** — If Docker daemon is hanging or Docker Desktop is starting up, `container-engine.sh` freezes with no user feedback or timeout.
+- **SQLite crash safety and WAL recovery in Docker volumes** — OOM kill or SIGKILL may leave WAL files; `restart: unless-stopped` could restart into corrupted state. Known SQLite-in-Docker tradeoff.
+- **No resource limits on container** — No `mem_limit`/`cpus` constraints in `docker-compose.yml`. Production hardening, out of scope for portfolio project.
 
 ## Closed — Already Fixed
 

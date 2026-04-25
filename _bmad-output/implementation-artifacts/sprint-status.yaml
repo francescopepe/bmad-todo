@@ -69,10 +69,10 @@ development_status:
   epic-3-retrospective: done
 
   # Epic 4: Docker Deployment & Production Readiness
-  epic-4: in-progress
+  epic-4: done
   4-1-dockerfile-and-multi-stage-build: done
-  4-2-docker-compose-and-data-persistence: backlog
-  epic-4-retrospective: optional
+  4-2-docker-compose-and-data-persistence: done
+  epic-4-retrospective: done
 
   # Epic 5: Quality Assurance & Documentation
   epic-5: backlog

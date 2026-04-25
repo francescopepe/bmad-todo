@@ -14,7 +14,7 @@ interface ToastProps {
 
 function SingleToast({ id, message, onDismiss }: { id: number; message: string; onDismiss: (id: number) => void }) {
   const [visible, setVisible] = useState(false);
-  const slideOutTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const slideOutTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const rafId = requestAnimationFrame(() => setVisible(true));

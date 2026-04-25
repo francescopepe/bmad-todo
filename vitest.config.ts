@@ -1,6 +1,12 @@
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { parse } from 'dotenv';
+
+const testEnv = existsSync('.env.test')
+  ? parse(readFileSync('.env.test', 'utf-8'))
+  : {};
 
 export default defineConfig({
   plugins: [react()],
@@ -8,9 +14,7 @@ export default defineConfig({
     environment: 'jsdom',
     fileParallelism: false,
     setupFiles: [],
-    env: require('fs').existsSync('.env.test')
-      ? { ...require('dotenv').parse(require('fs').readFileSync('.env.test', 'utf-8')) }
-      : {},
+    env: testEnv,
     include: ['src/**/*.test.{ts,tsx}'],
     coverage: {
       reporter: ['text', 'html'],

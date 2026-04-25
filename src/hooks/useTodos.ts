@@ -24,7 +24,9 @@ export function useTodos(options?: UseTodosOptions): UseTodosReturn {
   const [error, setError] = useState<string | null>(null);
   const [fetchKey, setFetchKey] = useState(0);
   const todosRef = useRef(todos);
-  todosRef.current = todos;
+  useEffect(() => {
+    todosRef.current = todos;
+  }, [todos]);
 
   const retry = useCallback(() => {
     setError(null);
